@@ -1,0 +1,12 @@
+Invoice for Bill 4
+
+Reservation ID: 5
+Customer: Femi Yolemi
+Check-in Date: 2024-06-30
+Check-out Date: 2024-07-18
+Date: 2024-07-03
+Amount: $1800000.00
+
+Services:
+- Room Service: $5000.00
+- Laundry: $3500.00
