@@ -16,7 +16,6 @@ class CustomerManagement:
 
         left_frame = ctk.CTkFrame(self.master)
         left_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
-
         left_frame.grid_rowconfigure(0, weight=0) 
         left_frame.grid_rowconfigure(1, weight=0) 
         left_frame.grid_rowconfigure(2, weight=1) 

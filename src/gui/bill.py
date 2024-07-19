@@ -13,6 +13,7 @@ from model.service import Service
 class BillManagement:
     def __init__(self, master):
         self.master = master
+        # self.bill_id_map = {}
         self.create_widgets()
 
     def create_widgets(self):
@@ -22,7 +23,9 @@ class BillManagement:
 
         left_frame = ctk.CTkFrame(self.master)
         left_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
-        left_frame.grid_rowconfigure(1, weight=1)
+        left_frame.grid_rowconfigure(0, weight=0) 
+        left_frame.grid_rowconfigure(1, weight=0) 
+        left_frame.grid_rowconfigure(2, weight=1)
         left_frame.grid_columnconfigure(0, weight=1)
 
         # Search bar frame
@@ -33,6 +36,7 @@ class BillManagement:
         self.search_var = ctk.StringVar()
         self.search_entry = ctk.CTkEntry(search_frame, textvariable=self.search_var, placeholder_text="Search bills...")
         self.search_entry.grid(row=0, column=0, sticky="ew", padx=(0, 5))
+        self.search_entry.bind("<Return>", lambda event: self.search_customers())
 
         self.search_button = ctk.CTkButton(search_frame, text="Search", command=self.search_bills, width=100)
         self.search_button.grid(row=0, column=1)
@@ -41,9 +45,12 @@ class BillManagement:
         self.refresh_button = ctk.CTkButton(search_frame, text="Refresh", command=self.refresh, width=100)
         self.refresh_button.grid(row=0, column=2)
 
+        self.list_title = ctk.CTkLabel(left_frame, text="All Bills", font=("Arial", 16, "bold"))
+        self.list_title.grid(row=1, column=0, sticky="w", padx=5, pady=(5, 0))
+
         # Bill list
         self.bill_list = CTkListbox(left_frame, command=self.on_select)
-        self.bill_list.grid(row=1, column=0, sticky="nsew", padx=5, pady=5)
+        self.bill_list.grid(row=2, column=0, sticky="nsew", padx=5, pady=5)
 
         # Right frame
         self.right_frame = ctk.CTkFrame(self.master)
@@ -235,6 +242,11 @@ class BillManagement:
             self.bill_list.insert("end", f"Bill {bill.bill_id}: Reservation {reservation.reservation_id} - ${bill.amount}")
         self.search_var.set("")
 
+        if criteria:
+            self.list_title.configure(text=f"Search Results for '{criteria}'")
+        else:
+            self.list_title.configure(text="All Bills")
+
     def clear_fields(self):
         self.reservation_search_var.set("")
         self.reservation_id_var.set("")
@@ -249,6 +261,7 @@ class BillManagement:
     def refresh(self):
         self.load_bills()
         self.clear_fields()
+        self.list_title.configure(text="All Bills")
 
     def generate_invoice(self):
         selection = self.bill_list.get(self.bill_list.curselection())
@@ -286,15 +299,22 @@ class BillManagement:
         else:
             tkinter.messagebox.showwarning("Warning", "Please select a bill to generate an invoice")
 
+
     def save_invoice(self, invoice_text, bill_id):
-    
-        if not os.path.exists('invoices'):
-            os.makedirs('invoices')
-    
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        
+        src_dir = os.path.dirname(current_dir)
+        
+        invoices_dir = os.path.join(src_dir, 'invoices')
+        
+        if not os.path.exists(invoices_dir):
+            os.makedirs(invoices_dir)
+
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"invoices/invoice_bill_{bill_id}_{timestamp}.txt"
-    
-        with open(filename, 'w') as file:
+        filename = f"invoice_bill_{bill_id}_{timestamp}.txt"
+        full_path = os.path.join(invoices_dir, filename)
+
+        with open(full_path, 'w') as file:
             file.write(invoice_text)
-    
-        tkinter.messagebox.showinfo("Success", f"Invoice saved as {filename}")
+
+        tkinter.messagebox.showinfo("Success", f"Invoice saved as {full_path}")
