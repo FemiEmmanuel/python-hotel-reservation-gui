@@ -1,7 +1,7 @@
 import customtkinter as ctk
 import tkinter.messagebox
 from gui.room import RoomManagement
-# from gui.reservation import ReservationManagement
+from gui.reservation import ReservationManagement
 from gui.customer import CustomerManagement
 from gui.bill import BillManagement
 
@@ -21,7 +21,7 @@ class MainWindow:
 
         # Initialize tab contents
         self.customer_management = CustomerManagement(self.customer_tab)
-        # self.reservation_management = ReservationManagement(self.reservation_tab)
+        self.reservation_management = ReservationManagement(self.reservation_tab)
         self.billing = BillManagement(self.billing_tab)
         self.room_management = RoomManagement(self.room_tab)
         

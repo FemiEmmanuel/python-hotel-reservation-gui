@@ -13,7 +13,8 @@ from model.service import Service
 class BillManagement:
     def __init__(self, master):
         self.master = master
-        # self.bill_id_map = {}
+        self.bill_id_map = {}
+        self.reservation_id_map = {}
         self.create_widgets()
 
     def create_widgets(self):
@@ -105,10 +106,8 @@ class BillManagement:
 
         self.update_button = ctk.CTkButton(form_frame, text="Update Bill", command=self.update_bill)
         self.delete_button = ctk.CTkButton(form_frame, text="Delete Bill", command=self.delete_bill)
-
         self.generate_invoice_button = ctk.CTkButton(form_frame, text="Generate Invoice", command=self.generate_invoice)
-        self.generate_invoice_button.grid(row=6, column=0, columnspan=2, pady=10)
-
+        
         self.load_bills()
 
 
@@ -123,23 +122,30 @@ class BillManagement:
         search_term = self.reservation_search_var.get()
         reservations = Reservation.search(search_term)
         self.reservation_listbox.delete(0, "end")
-        for reservation in reservations:
-            customer = Customer.get(reservation.customer_id)
-            self.reservation_listbox.insert("end", f"{reservation.reservation_id}: {customer.name} - {reservation.check_in_date} to {reservation.check_out_date}")
+        self.reservation_id_map.clear()
+        for index, reservation in enumerate(reservations):
+            display_text = f"Reservation {reservation['reservation_id']}: {reservation['customer_name']} - Room {reservation['room_number']}"
+            self.reservation_listbox.insert("end", display_text)
+            self.reservation_id_map[index] = reservation['reservation_id']
         self.reservation_listbox.grid()
 
     def on_reservation_select(self, event):
-        selection = self.reservation_listbox.get(self.reservation_listbox.curselection())
-        if selection:
-            reservation_id = int(selection.split(':')[0])
-            reservation = Reservation.get(reservation_id)
-            if reservation:
-                self.reservation_id_var.set(str(reservation_id))
-                self.amount_var.set(f"${reservation.total_cost:.2f}")
-                self.reservation_entry.configure(state="readonly")
-                self.reservation_search_button.pack_forget()
-                self.reservation_listbox.grid_remove()
-                self.update_amount()
+        selection = self.reservation_listbox.curselection()
+        if selection is not None:
+            index = selection
+            reservation_id = self.reservation_id_map.get(index)
+            if reservation_id:
+                reservation = Reservation.get_reservation_details(reservation_id)
+                if reservation:
+                    self.reservation_id_var.set(str(reservation_id))
+                    self.amount_var.set(f"${reservation['total_cost']:.2f}")
+                    self.reservation_entry.configure(state="readonly")
+                    self.reservation_search_button.pack_forget()
+                    self.reservation_listbox.grid_remove()
+                    self.update_amount()
+
+                    display_text = f"Reservation {reservation['reservation_id']}: {reservation['customer_name']}"
+                    self.reservation_search_var.set(display_text)
 
     def update_amount(self):
         if self.reservation_id_var.get():
@@ -154,36 +160,41 @@ class BillManagement:
     def load_bills(self):
         bills = Bill.get_all_bill_details()
         self.bill_list.delete(0, "end")
-        for bill in bills:
+        self.bill_id_map.clear()
+        for index, bill in enumerate(bills):
             self.bill_list.insert("end", f"Bill {bill['bill_id']}: Reservation {bill['reservation_id']} - ${bill['amount']}")
+            self.bill_id_map[index] = bill['bill_id']
 
 
     def on_select(self, event):
-        selection = self.bill_list.get(self.bill_list.curselection())
-        if selection:
-            bill_id = int(selection.split(':')[0].split()[1])
-            bill_details = Bill.get_bill_details(bill_id)
-            if bill_details:
-                self.reservation_id_var.set(str(bill_details['reservation_id']))
-                self.amount_var.set(f"${bill_details['amount']:.2f}")
-                self.date_var.set(bill_details['date'])
-            
-                # Set services checkboxes
-                for service_id, var in self.services_vars:
-                    var.set(any(service['service_id'] == service_id for service in bill_details['services']))
-            
-                self.button_frame.grid_remove()
-                self.update_button.grid(row=6, column=0, columnspan=2, pady=10)
-                self.delete_button.grid(row=7, column=0, columnspan=2, pady=10)
-            
-                # Update reservation entry
-                self.reservation_search_var.set(f"{bill_details['reservation_id']}: {bill_details['customer_name']} - {bill_details['check_in_date']} to {bill_details['check_out_date']}")
-                self.reservation_entry.configure(state="readonly")
-                self.reservation_search_button.pack_forget()
+        selection = self.bill_list.curselection()
+        if selection is not None:
+            index = selection
+            bill_id = self.bill_id_map.get(index)
+            if bill_id:
+                bill_details = Bill.get_bill_details(bill_id)
+                if bill_details:
+                    self.reservation_id_var.set(str(bill_details['reservation_id']))
+                    self.amount_var.set(f"${bill_details['amount']:.2f}")
+                    self.date_var.set(bill_details['date'])
+                
+                    # Set services checkboxes
+                    for service_id, var in self.services_vars:
+                        var.set(any(service['service_id'] == service_id for service in bill_details['services']))
+                
+                    self.button_frame.grid_remove()
+                    self.update_button.grid(row=6, column=0, columnspan=2, pady=10)
+                    self.delete_button.grid(row=7, column=0, columnspan=2, pady=10)
+                    self.generate_invoice_button.grid(row=8, column=0, columnspan=2, pady=10)
+                
+                    # Update reservation entry
+                    self.reservation_search_var.set(f"{bill_details['reservation_id']}: {bill_details['customer_name']} - {bill_details['check_in_date']} to {bill_details['check_out_date']}")
+                    self.reservation_entry.configure(state="readonly")
+                    self.reservation_search_button.pack_forget()
         else:
-            self.update_button.grid_forget()
-            self.delete_button.grid_forget()
-            self.button_frame.grid(row=4, column=0, columnspan=2, pady=10)
+            # self.update_button.grid_forget()
+            # self.delete_button.grid_forget()
+            # self.button_frame.grid(row=4, column=0, columnspan=2, pady=10)
             self.clear_fields()
 
             
@@ -196,40 +207,43 @@ class BillManagement:
                 self.date_var.get(),
                 selected_services
             )
-            print(type(selected_services))
             self.refresh()
             tkinter.messagebox.showinfo("Success", "Bill added successfully")
         except ValueError as e:
             tkinter.messagebox.showerror("Error", str(e))
 
     def update_bill(self):
-        selection = self.bill_list.get(self.bill_list.curselection())
-        if selection:
-            bill_id = int(selection.split(':')[0].split()[1])
-            try:
-                selected_services = [service_id for service_id, var in self.services_vars if var.get()]
-                Bill.update(
-                    bill_id,
-                    int(self.reservation_id_var.get()),
-                     float(self.amount_var.get().replace('$', '')),
-                    self.date_var.get(),
-                    selected_services
-                )
-                self.refresh()
-                tkinter.messagebox.showinfo("Success", "Bill updated successfully")
-            except ValueError as e:
-                tkinter.messagebox.showerror("Error", str(e))
+        selection = self.bill_list.curselection()
+        if selection is not None:
+            index = selection
+            bill_id = self.bill_id_map.get(index)
+            if bill_id:
+                try:
+                    selected_services = [service_id for service_id, var in self.services_vars if var.get()]
+                    Bill.update(
+                        bill_id,
+                        int(self.reservation_id_var.get()),
+                        float(self.amount_var.get().replace('$', '')),
+                        self.date_var.get(),
+                        selected_services
+                    )
+                    self.refresh()
+                    tkinter.messagebox.showinfo("Success", "Bill updated successfully")
+                except ValueError as e:
+                    tkinter.messagebox.showerror("Error", str(e))
         else:
             tkinter.messagebox.showwarning("Warning", "Please select a bill to update")
 
     def delete_bill(self):
-        selection = self.bill_list.get(self.bill_list.curselection())
-        if selection:
-            bill_id = int(selection.split(':')[0].split()[1])
-            if tkinter.messagebox.askyesno("Confirm", "Are you sure you want to delete this bill?"):
-                Bill.delete(bill_id)
-                self.refresh()
-                tkinter.messagebox.showinfo("Success", "Bill deleted successfully")
+        selection = self.bill_list.curselection()
+        if selection is not None:
+            index = selection
+            bill_id = self.bill_id_map.get(index)
+            if bill_id:
+                if tkinter.messagebox.askyesno("Confirm", "Are you sure you want to delete this bill?"):
+                    Bill.delete(bill_id)
+                    self.refresh()
+                    tkinter.messagebox.showinfo("Success", "Bill deleted successfully")
         else:
             tkinter.messagebox.showwarning("Warning", "Please select a bill to delete")
 
@@ -257,6 +271,10 @@ class BillManagement:
         self.reservation_listbox.delete(0, "end")
         self.reservation_entry.configure(state="normal")
         self.reservation_search_button.pack(side="left")
+        self.update_button.grid_forget()
+        self.delete_button.grid_forget()
+        self.generate_invoice_button.grid_forget()
+        self.button_frame.grid(row=5, column=0, columnspan=2, pady=10)
 
     def refresh(self):
         self.load_bills()
@@ -264,38 +282,40 @@ class BillManagement:
         self.list_title.configure(text="All Bills")
 
     def generate_invoice(self):
-        selection = self.bill_list.get(self.bill_list.curselection())
-        if selection:
-            bill_id = int(selection.split(':')[0].split()[1])
-            bill_details = Bill.get_bill_details(bill_id)
+        selection = self.bill_list.curselection()
+        if selection is not None:
+            index = selection
+            bill_id = self.bill_id_map.get(index)
+            if bill_id:
+                bill_details = Bill.get_bill_details(bill_id)
             
-            if bill_details:
-                invoice_text = f"Invoice for Bill {bill_details['bill_id']}\n\n"
-                invoice_text += f"Reservation ID: {bill_details['reservation_id']}\n"
-                invoice_text += f"Customer: {bill_details['customer_name']}\n"
-                invoice_text += f"Check-in Date: {bill_details['check_in_date']}\n"
-                invoice_text += f"Check-out Date: {bill_details['check_out_date']}\n"
-                invoice_text += f"Date: {bill_details['date']}\n"
-                invoice_text += f"Amount: ${bill_details['amount']}\n\n"
-                invoice_text += "Services:\n"
+                if bill_details:
+                    invoice_text = f"Invoice for Bill {bill_details['bill_id']}\n\n"
+                    invoice_text += f"Reservation ID: {bill_details['reservation_id']}\n"
+                    invoice_text += f"Customer: {bill_details['customer_name']}\n"
+                    invoice_text += f"Check-in Date: {bill_details['check_in_date']}\n"
+                    invoice_text += f"Check-out Date: {bill_details['check_out_date']}\n"
+                    invoice_text += f"Date: {bill_details['date']}\n"
+                    invoice_text += f"Amount: ${bill_details['amount']}\n\n"
+                    invoice_text += "Services:\n"
+                    
+                    for service in bill_details['services']:
+                        invoice_text += f"- {service['name']}: ${service['price']}\n"
+                    
                 
-                for service in bill_details['services']:
-                    invoice_text += f"- {service['name']}: ${service['price']}\n"
-                
-            
-                invoice_window = ctk.CTkToplevel(self.master)
-                invoice_window.title(f"Invoice for Bill {bill_details['bill_id']}")
-                invoice_window.geometry("400x300")
-                
-                invoice_text_widget = ctk.CTkTextbox(invoice_window, width=380, height=250)
-                invoice_text_widget.pack(padx=10, pady=10)
-                invoice_text_widget.insert("1.0", invoice_text)
-                invoice_text_widget.configure(state="disabled")
-                
-                save_button = ctk.CTkButton(invoice_window, text="Save Invoice", command=lambda: self.save_invoice(invoice_text, bill_details['bill_id']))
-                save_button.pack(pady=5)
-            else:
-                tkinter.messagebox.showwarning("Error", "Bill details not found")
+                    invoice_window = ctk.CTkToplevel(self.master)
+                    invoice_window.title(f"Invoice for Bill {bill_details['bill_id']}")
+                    invoice_window.geometry("400x300")
+                    
+                    invoice_text_widget = ctk.CTkTextbox(invoice_window, width=380, height=250)
+                    invoice_text_widget.pack(padx=10, pady=10)
+                    invoice_text_widget.insert("1.0", invoice_text)
+                    invoice_text_widget.configure(state="disabled")
+                    
+                    save_button = ctk.CTkButton(invoice_window, text="Save Invoice", command=lambda: self.save_invoice(invoice_text, bill_details['bill_id']))
+                    save_button.pack(pady=5)
+                else:
+                    tkinter.messagebox.showwarning("Error", "Bill details not found")
         else:
             tkinter.messagebox.showwarning("Warning", "Please select a bill to generate an invoice")
 

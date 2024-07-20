@@ -11,6 +11,8 @@ class ReservationManagement:
     def __init__(self, master):
         self.master = master
         self.reservation_id_map = {}
+        self.customer_id_map = {}
+        self.room_id_map = {}
         self.create_widgets()
 
     def create_widgets(self):
@@ -115,7 +117,7 @@ class ReservationManagement:
         self.check_availability_button = ctk.CTkButton(self.button_frame, text="Check Availability", command=self.check_availability)
         self.check_availability_button.pack(side="left", padx=10)
 
-        self.add_button = ctk.CTkButton(self.button_frame, text="Add Reservation", command=self.add_reservation)
+        self.add_button = ctk.CTkButton(self.button_frame, text="Add Reservation", command=self.add_reservation, state="disabled")
         self.add_button.pack(side="left", padx=10)
 
         self.update_button = ctk.CTkButton(form_frame, text="Update Reservation", command=self.update_reservation)
@@ -168,38 +170,48 @@ class ReservationManagement:
         search_term = self.customer_search_var.get()
         customers = Customer.search(search_term)
         self.customer_listbox.delete(0, "end")
-        for customer in customers:
-            self.customer_listbox.insert("end", f"{customer.customer_id}: {customer.name}")
-        self.customer_listbox.grid() 
+        self.customer_id_map.clear()
+        for index, customer in enumerate(customers):
+            self.customer_listbox.insert("end", f"{customer.name}")
+            self.customer_id_map[index] = customer.customer_id
+        self.customer_listbox.grid()
 
     def on_customer_select(self, event):
-        selection = self.customer_listbox.get(self.customer_listbox.curselection()),
-        if selection:
-            customer_id, customer_name = selection.split(': ', 1)
-            self.customer_id_var.set(customer_id)
-            self.customer_search_var.set(customer_name)
-            self.customer_entry.configure(state="readonly")
-            self.customer_search_button.pack_forget()
-            self.customer_listbox.grid_remove()
+        selection = self.customer_listbox.curselection()
+        if selection is not None:
+            index = selection
+            customer_id = self.customer_id_map.get(index)
+            if customer_id:
+                customer = Customer.get(customer_id)
+                self.customer_id_var.set(str(customer_id))
+                self.customer_search_var.set(customer.name)
+                self.customer_entry.configure(state="readonly")
+                self.customer_search_button.pack_forget()
+                self.customer_listbox.grid_remove()
 
     def search_room(self):
         search_term = self.room_search_var.get()
         rooms = Room.search(search_term)
         self.room_listbox.delete(0, "end")
-        for room in rooms:
-            self.room_listbox.insert("end", f"{room.room_id}: {room.room_number} - {room.room_type.name}")
+        self.room_id_map.clear()
+        for index, room in enumerate(rooms):
+            self.room_listbox.insert("end", f"{room.room_number} - {room.room_type.name}")
+            self.room_id_map[index] = room.room_id
         self.room_listbox.grid() 
 
     def on_room_select(self, event):
-        selection = self.room_listbox.get(self.room_listbox.curselection())
-        if selection:
-            room_id, room_number = selection.split(': ', 1)
-            self.room_id_var.set(room_id)
-            self.room_search_var.set(room_number)
-            self.room_entry.configure(state="readonly")
-            self.room_search_button.pack_forget()
-            self.room_listbox.grid_remove()
-            self.calculate_total_cost()
+        selection = self.room_listbox.curselection()
+        if selection is not None:
+            index = selection
+            room_id = self.room_id_map.get(index)
+            if room_id:
+                room = Room.get(room_id)
+                self.room_id_var.set(str(room_id))
+                self.room_search_var.set(f"{room.room_number} - {room.room_type.name}")
+                self.room_entry.configure(state="readonly")
+                self.room_search_button.pack_forget()
+                self.room_listbox.grid_remove()
+                self.calculate_total_cost()
 
 
     def calculate_total_cost(self, event=None):
@@ -315,6 +327,10 @@ class ReservationManagement:
         self.room_entry.configure(state="normal")  
         self.room_search_button.pack(side="left") 
         self.room_listbox.grid_remove()
+
+        self.customer_id_map.clear()
+        self.room_id_map.clear()
+
 
     def refresh(self):
         self.load_reservations()

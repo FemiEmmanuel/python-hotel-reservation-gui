@@ -27,7 +27,7 @@ class Reservation:
         FROM reservations r
         JOIN customers c ON r.customer_id = c.customer_id
         JOIN rooms rm ON r.room_id = rm.room_id
-        JOIN room_types rt ON rm.room_type_id = rt.room_type_id
+        JOIN room_types rt ON rm.room_type_id = rt.room_types_id
         WHERE r.reservation_id = %s
         """
         result = fetch_data(conn, query, (reservation_id,))
@@ -94,7 +94,7 @@ class Reservation:
         FROM reservations r
         JOIN customers c ON r.customer_id = c.customer_id
         JOIN rooms rm ON r.room_id = rm.room_id
-        JOIN room_types rt ON rm.room_type_id = rt.room_type_id
+        JOIN room_types rt ON rm.room_type_id = rt.room_types_id
         """
         results = fetch_data(conn, query)
         conn.close()
@@ -128,7 +128,7 @@ class Reservation:
         FROM reservations r
         JOIN customers c ON r.customer_id = c.customer_id
         JOIN rooms rm ON r.room_id = rm.room_id
-        JOIN room_types rt ON rm.room_type_id = rt.room_type_id
+        JOIN room_types rt ON rm.room_type_id = rt.room_types_id
         WHERE c.name LIKE %s 
         OR r.check_in_date LIKE %s
         OR r.check_out_date LIKE %s
