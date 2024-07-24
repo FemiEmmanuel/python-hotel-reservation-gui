@@ -76,10 +76,18 @@ class BillManagement:
         ctk.CTkLabel(form_frame, text="Search Reservation:").grid(row=0, column=0, sticky="w", padx=10, pady=5)
         self.reservation_search_frame = ctk.CTkFrame(form_frame)
         self.reservation_search_frame.grid(row=0, column=1, sticky="w", padx=10, pady=5)
-        self.reservation_entry = ctk.CTkEntry(self.reservation_search_frame, textvariable=self.reservation_search_var)
-        self.reservation_entry.pack(side="left")
-        self.reservation_search_button = ctk.CTkButton(self.reservation_search_frame, text="Search", command=self.search_reservation)
-        self.reservation_search_button.pack(side="left")
+
+        ctk.CTkLabel(self.reservation_search_frame, 
+                text="Enter customer name or room type:", 
+                text_color="gray").pack(side="top", padx=(0, 5), anchor="w")
+        
+        entry_button_frame = ctk.CTkFrame(self.reservation_search_frame)
+        entry_button_frame.pack(side="top", fill="x")
+        
+        self.reservation_entry = ctk.CTkEntry(entry_button_frame, textvariable=self.reservation_search_var)
+        self.reservation_entry.pack(side="left", expand=True, fill="x", padx=(0, 5))
+        self.reservation_search_button = ctk.CTkButton(entry_button_frame, text="Search", command=self.search_reservation)
+        self.reservation_search_button.pack(side="right")
 
         self.reservation_listbox = CTkListbox(form_frame, command=self.on_reservation_select)
         self.reservation_listbox.grid(row=1, column=0, columnspan=2, sticky="ew", padx=10, pady=5)
