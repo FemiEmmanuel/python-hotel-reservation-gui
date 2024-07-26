@@ -18,7 +18,7 @@ A comprehensive hotel reservation system built with Python, featuring a graphica
 ## Setup Instructions
 
 1. Ensure you have Python and MySQL installed on your system.
-2. Clone the repository: git clone https://github.com/FemiEmmanuel/python-hotel-reservation-gui.git, cd python-hotel-reservation-gui
+2. Clone the repository: git clone https://github.com/FemiEmmanuel/python-hotel-reservation-gui, cd python-hotel-reservation-gui
 3. Create a virtual environment: python -m venv venv. To activate run: venv/bin/activate  # On Windows use  venv\Scripts\activate
 4. Install required packages: pip install -r requirements.txt
 5. Set up the MySQL database: Create config.py file in the root folder and create a dictionary as db_config with your database credentials.
