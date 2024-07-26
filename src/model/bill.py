@@ -9,6 +9,7 @@ class Bill:
         self.date = date
         self.services = services or []
 
+    # Add a bill
     @staticmethod
     def create(reservation_id, amount, date, services):
         conn = connect_to_database()
@@ -25,6 +26,7 @@ class Bill:
 
         conn.close()
 
+    # Retrieve a bill by id
     @staticmethod
     def get(bill_id):
         conn = connect_to_database()
@@ -42,6 +44,8 @@ class Bill:
         conn.close()
         return None
     
+
+    # Retrieves all details of a bill. 
     @staticmethod
     def get_bill_details(bill_id):
         conn = connect_to_database()
@@ -73,6 +77,7 @@ class Bill:
         conn.close()
         return bill_details
 
+    # Retrieves all bills with all details
     @staticmethod
     def get_all_bill_details():
         conn = connect_to_database()
@@ -99,6 +104,7 @@ class Bill:
         conn.close()
         return bills
 
+    #Updates a bill
     @staticmethod
     def update(bill_id, reservation_id, amount, date, services):
         conn = connect_to_database()
@@ -114,6 +120,7 @@ class Bill:
 
         conn.close()
 
+    # Delete a bill
     @staticmethod
     def delete(bill_id):
         conn = connect_to_database()
@@ -121,6 +128,7 @@ class Bill:
         execute_query(conn, "DELETE FROM bills WHERE bill_id = %s", (bill_id,))
         conn.close()
 
+    # Retrieves all bills
     @staticmethod
     def get_all():
         conn = connect_to_database()
@@ -138,6 +146,7 @@ class Bill:
         conn.close()
         return bills
     
+    # Retrieve a bill by reservation id
     @staticmethod
     def get_by_reservation(reservation_id):
         conn = connect_to_database()
@@ -148,6 +157,7 @@ class Bill:
             return Bill(**result[0])
         return None
     
+    # Retrieves all services associated with a bill
     @staticmethod
     def get_services_for_bill(bill_id):
         conn = connect_to_database()
@@ -160,6 +170,7 @@ class Bill:
         services = [Service(**result) for result in results]
         return services
     
+    # Search for a bill and all its details
     @staticmethod
     def search(criteria):
         conn = connect_to_database()

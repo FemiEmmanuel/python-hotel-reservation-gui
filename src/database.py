@@ -1,11 +1,15 @@
 import mysql.connector
 from config import db_config
 
+# Method to create database
 def create_database_if_not_exists(cursor, db_name):
     cursor.execute(f"CREATE DATABASE IF NOT EXISTS {db_name}")
 
+
+# Create all database tables
 def create_tables(cursor):
 
+    # Customers Table
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS customers (
     customer_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -15,6 +19,7 @@ def create_tables(cursor):
     email VARCHAR(100)
     )""")
 
+    # Room_types Table
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS room_types (
     room_types_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -23,6 +28,7 @@ def create_tables(cursor):
     features TEXT
     )""")
 
+    # Rooms Table
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS rooms (
     room_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -33,6 +39,7 @@ def create_tables(cursor):
     FOREIGN KEY (room_type_id) REFERENCES room_types(room_types_id) ON DELETE CASCADE
     )""")
 
+    # Reservations Table
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS reservations (
     reservation_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -45,6 +52,8 @@ def create_tables(cursor):
     FOREIGN KEY (room_id) REFERENCES rooms(room_id) ON DELETE CASCADE
     )""")
 
+
+    # Services Table
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS services (
     service_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -53,6 +62,8 @@ def create_tables(cursor):
     price DECIMAL(10, 2)
     )""")
 
+
+    # Bills Table
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS bills (
     bill_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -63,6 +74,7 @@ def create_tables(cursor):
     FOREIGN KEY (reservation_id) REFERENCES reservations(reservation_id) ON DELETE CASCADE
     )""")
 
+    # Billservice Table
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS billservice (
     billservice_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -72,7 +84,7 @@ def create_tables(cursor):
     FOREIGN KEY (service_id) REFERENCES services(service_id) ON DELETE CASCADE
     )""")
 
-
+# Create and use the database, create tables
 def initialize_database():
     
     conn = mysql.connector.connect(
@@ -91,15 +103,18 @@ def initialize_database():
     cursor.close()
     conn.close()
 
+# Database connection method
 def connect_to_database():
     return mysql.connector.connect(**db_config)
 
+# Method to add, update, delete from the database
 def execute_query(conn, query, values=None):
     cursor = conn.cursor()
     cursor.execute(query, values)
     conn.commit()
     cursor.close()
 
+#Method to retrieve data from the database
 def fetch_data(conn, query, values=None):
     cursor = conn.cursor(dictionary=True)
     cursor.execute(query, values)
