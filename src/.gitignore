@@ -17,32 +17,9 @@ invoices/
 *.log
 
 # Local configuration file
-config.ini
+config.py
 
 # Operating system files
 .DS_Store
 Thumbs.db
 
-# Other common Python ignores
-*.pyc
-*.pyo
-*.pyd
-.Python
-env/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-*.egg-info/
-.installed.cfg
-*.egg
-
-# If using pytest
-.pytest_cache/
