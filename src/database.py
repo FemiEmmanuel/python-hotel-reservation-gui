@@ -1,14 +1,5 @@
 import mysql.connector
-
-db_config = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': 'root',
-    'database': 'hotel_reservation_system'
-}
-
-def connect_to_database():
-    return mysql.connector.connect(**db_config)
+from config import db_config
 
 def create_database_if_not_exists(cursor, db_name):
     cursor.execute(f"CREATE DATABASE IF NOT EXISTS {db_name}")
@@ -81,6 +72,28 @@ def create_tables(cursor):
     FOREIGN KEY (service_id) REFERENCES services(service_id) ON DELETE CASCADE
     )""")
 
+
+def initialize_database():
+    
+    conn = mysql.connector.connect(
+        host=db_config['host'],
+        user=db_config['user'],
+        password=db_config['password']
+    )
+    
+    cursor = conn.cursor()
+
+    create_database_if_not_exists(cursor, db_config['database'])
+    cursor.execute(f"USE {db_config['database']}")
+    create_tables(cursor)
+    
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+def connect_to_database():
+    return mysql.connector.connect(**db_config)
+
 def execute_query(conn, query, values=None):
     cursor = conn.cursor()
     cursor.execute(query, values)
@@ -94,18 +107,6 @@ def fetch_data(conn, query, values=None):
     cursor.close()
     return data 
 
-def initialize_database():
-    
-    conn = connect_to_database()
-    
-    cursor = conn.cursor()
-    create_database_if_not_exists(cursor, db_config['database'])
-    cursor.execute(f"USE {db_config['database']}")
-    create_tables(cursor)
-    
-    conn.commit()
-    cursor.close()
-    conn.close()
 
 if __name__ == "__main__":
     initialize_database()
