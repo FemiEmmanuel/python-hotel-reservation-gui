@@ -1,7 +1,9 @@
 import customtkinter as ctk
 from CTkListbox import *
 import tkinter.messagebox
+
 from model.customer import Customer
+from utils.colors import *
 
 class CustomerManagement:
     def __init__(self, master):
@@ -31,11 +33,11 @@ class CustomerManagement:
         self.search_entry.grid(row=0, column=0, sticky="ew", padx=(0, 5))
         self.search_entry.bind("<Return>", lambda event: self.search_customers())
 
-        self.search_button = ctk.CTkButton(search_frame, text="Search", command=self.search_customers, width=100)
+        self.search_button = ctk.CTkButton(search_frame, text="Search", command=self.search_customers, width=100, fg_color=SEARCH_COLOR)
         self.search_button.grid(row=0, column=1)
 
         # Refresh button
-        self.refresh_button = ctk.CTkButton(search_frame, text="Refresh", command=self.refresh, width=100)
+        self.refresh_button = ctk.CTkButton(search_frame, text="Refresh", command=self.refresh, width=100, fg_color=REFRESH_COLOR)
         self.refresh_button.grid(row=0, column=2)
 
         self.list_title = ctk.CTkLabel(left_frame, text="All Customers", font=("Arial", 16, "bold"))
@@ -80,8 +82,8 @@ class CustomerManagement:
         self.add_button = ctk.CTkButton(form_frame, text="Add Customer", command=self.add_customer)
         self.add_button.grid(row=4, column=0, columnspan=2, pady=10)
 
-        self.update_button = ctk.CTkButton(form_frame, text="Update Customer", command=self.update_customer)
-        self.delete_button = ctk.CTkButton(form_frame, text="Delete Customer", command=self.delete_customer)
+        self.update_button = ctk.CTkButton(form_frame, text="Update Customer", command=self.update_customer, fg_color=UPDATE_COLOR)
+        self.delete_button = ctk.CTkButton(form_frame, text="Delete Customer", command=self.delete_customer, fg_color=DELETE_COLOR)
 
         # Load customers
         self.load_customers()

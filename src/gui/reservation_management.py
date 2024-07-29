@@ -4,6 +4,7 @@ import tkinter.messagebox
 from model.reservation import Reservation
 from model.customer import Customer
 from model.room import Room
+from utils.colors import *
 from tkcalendar import DateEntry
 from datetime import datetime
 
@@ -37,11 +38,11 @@ class ReservationManagement:
         self.search_entry.grid(row=0, column=0, sticky="ew", padx=(0, 5))
         self.search_entry.bind("<Return>", lambda event: self.search_reservations())
 
-        self.search_button = ctk.CTkButton(search_frame, text="Search", command=self.search_reservations, width=100)
+        self.search_button = ctk.CTkButton(search_frame, text="Search", command=self.search_reservations, width=100, fg_color=SEARCH_COLOR)
         self.search_button.grid(row=0, column=1)
 
         # Refresh button
-        self.refresh_button = ctk.CTkButton(search_frame, text="Refresh", command=self.refresh, width=100)
+        self.refresh_button = ctk.CTkButton(search_frame, text="Refresh", command=self.refresh, width=100, fg_color=REFRESH_COLOR)
         self.refresh_button.grid(row=0, column=2)
 
         self.list_title = ctk.CTkLabel(left_frame, text="All Reservations", font=("Arial", 16, "bold"))
@@ -78,7 +79,7 @@ class ReservationManagement:
         self.customer_search_frame.grid(row=0, column=1, sticky="w", padx=10, pady=5)
         self.customer_entry = ctk.CTkEntry(self.customer_search_frame, textvariable=self.customer_search_var)
         self.customer_entry.pack(side="left")
-        self.customer_search_button = ctk.CTkButton(self.customer_search_frame, text="Search", command=self.search_customer)
+        self.customer_search_button = ctk.CTkButton(self.customer_search_frame, text="Search", command=self.search_customer, fg_color=SEARCH_COLOR)
         self.customer_search_button.pack(side="left")
         
         self.customer_listbox = CTkListbox(form_frame, command=self.on_customer_select)
@@ -90,7 +91,7 @@ class ReservationManagement:
         self.room_search_frame.grid(row=2, column=1, sticky="w", padx=10, pady=5)
         self.room_entry = ctk.CTkEntry(self.room_search_frame, textvariable=self.room_search_var)
         self.room_entry.pack(side="left")
-        self.room_search_button = ctk.CTkButton(self.room_search_frame, text="Search", command=self.search_room)
+        self.room_search_button = ctk.CTkButton(self.room_search_frame, text="Search", command=self.search_room, fg_color=SEARCH_COLOR)
         self.room_search_button.pack(side="left")
         
         self.room_listbox = CTkListbox(form_frame, command=self.on_room_select)
@@ -114,14 +115,14 @@ class ReservationManagement:
         self.button_frame = ctk.CTkFrame(form_frame)
         self.button_frame.grid(row=7, column=0, columnspan=2, pady=10)
 
-        self.check_availability_button = ctk.CTkButton(self.button_frame, text="Check Availability", command=self.check_availability)
+        self.check_availability_button = ctk.CTkButton(self.button_frame, text="Check Availability", command=self.check_availability, fg_color=INVOICE_COLOR)
         self.check_availability_button.pack(side="left", padx=10)
 
         self.add_button = ctk.CTkButton(self.button_frame, text="Add Reservation", command=self.add_reservation, state="disabled")
         self.add_button.pack(side="left", padx=10)
 
-        self.update_button = ctk.CTkButton(form_frame, text="Update Reservation", command=self.update_reservation)
-        self.delete_button = ctk.CTkButton(form_frame, text="Delete Reservation", command=self.delete_reservation)
+        self.update_button = ctk.CTkButton(form_frame, text="Update Reservation", command=self.update_reservation, fg_color=UPDATE_COLOR)
+        self.delete_button = ctk.CTkButton(form_frame, text="Delete Reservation", command=self.delete_reservation, fg_color=DELETE_COLOR)
 
         self.load_reservations()
 

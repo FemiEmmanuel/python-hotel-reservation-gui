@@ -9,6 +9,7 @@ from model.bill import Bill
 from model.customer import Customer
 from model.reservation import Reservation
 from model.service import Service
+from utils.colors import *
 
 class BillManagement:
     def __init__(self, master):
@@ -39,11 +40,11 @@ class BillManagement:
         self.search_entry.grid(row=0, column=0, sticky="ew", padx=(0, 5))
         self.search_entry.bind("<Return>", lambda event: self.search_customers())
 
-        self.search_button = ctk.CTkButton(search_frame, text="Search", command=self.search_bills, width=100)
+        self.search_button = ctk.CTkButton(search_frame, text="Search", command=self.search_bills, width=100, fg_color=SEARCH_COLOR)
         self.search_button.grid(row=0, column=1)
 
         # Refresh button
-        self.refresh_button = ctk.CTkButton(search_frame, text="Refresh", command=self.refresh, width=100)
+        self.refresh_button = ctk.CTkButton(search_frame, text="Refresh", command=self.refresh, width=100, fg_color=REFRESH_COLOR)
         self.refresh_button.grid(row=0, column=2)
 
         self.list_title = ctk.CTkLabel(left_frame, text="All Bills", font=("Arial", 16, "bold"))
@@ -86,7 +87,7 @@ class BillManagement:
         
         self.reservation_entry = ctk.CTkEntry(entry_button_frame, textvariable=self.reservation_search_var)
         self.reservation_entry.pack(side="left", expand=True, fill="x", padx=(0, 5))
-        self.reservation_search_button = ctk.CTkButton(entry_button_frame, text="Search", command=self.search_reservation)
+        self.reservation_search_button = ctk.CTkButton(entry_button_frame, text="Search", command=self.search_reservation, fg_color=SEARCH_COLOR)
         self.reservation_search_button.pack(side="right")
 
         self.reservation_listbox = CTkListbox(form_frame, command=self.on_reservation_select)
@@ -112,9 +113,9 @@ class BillManagement:
         self.add_button = ctk.CTkButton(self.button_frame, text="Add Bill", command=self.add_bill)
         self.add_button.pack(side="left", padx=10)
 
-        self.update_button = ctk.CTkButton(form_frame, text="Update Bill", command=self.update_bill)
-        self.delete_button = ctk.CTkButton(form_frame, text="Delete Bill", command=self.delete_bill)
-        self.generate_invoice_button = ctk.CTkButton(form_frame, text="Generate Invoice", command=self.generate_invoice)
+        self.update_button = ctk.CTkButton(form_frame, text="Update Bill", command=self.update_bill, fg_color=UPDATE_COLOR)
+        self.delete_button = ctk.CTkButton(form_frame, text="Delete Bill", command=self.delete_bill, fg_color=DELETE_COLOR)
+        self.generate_invoice_button = ctk.CTkButton(form_frame, text="Generate Invoice", command=self.generate_invoice, fg_color=INVOICE_COLOR)
         
         self.load_bills()
 

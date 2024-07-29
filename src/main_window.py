@@ -1,9 +1,9 @@
 import customtkinter as ctk
 import tkinter.messagebox
-from gui.room import RoomManagement
-from gui.reservation import ReservationManagement
-from gui.customer import CustomerManagement
-from gui.bill import BillManagement
+from gui.room_management import RoomManagement
+from gui.reservation_management import ReservationManagement
+from gui.customer_management import CustomerManagement
+from gui.bill_management import BillManagement
 
 class MainWindow:
     def __init__(self, master):

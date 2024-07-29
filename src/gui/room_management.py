@@ -1,7 +1,9 @@
 import customtkinter as ctk
 from CTkListbox import *
 import tkinter.messagebox
+
 from model.room import Room, RoomType
+from utils.colors import *
 
 class RoomManagement:
     def __init__(self, master):
@@ -31,11 +33,11 @@ class RoomManagement:
         self.search_entry = ctk.CTkEntry(search_frame, textvariable=self.search_var, placeholder_text="Search rooms...")
         self.search_entry.grid(row=0, column=0, sticky="ew", padx=(0, 5))
 
-        self.search_button = ctk.CTkButton(search_frame, text="Search", command=self.search_rooms, width=100)
+        self.search_button = ctk.CTkButton(search_frame, text="Search", command=self.search_rooms, width=100, fg_color=SEARCH_COLOR)
         self.search_button.grid(row=0, column=1)
 
          # Refresh button
-        self.refresh_button = ctk.CTkButton(search_frame, text="Refresh", command=self.refresh, width=100)
+        self.refresh_button = ctk.CTkButton(search_frame, text="Refresh", command=self.refresh, width=100, fg_color=REFRESH_COLOR)
         self.refresh_button.grid(row=0, column=2)
 
         self.list_title = ctk.CTkLabel(left_frame, text="All Rooms", font=("Arial", 16, "bold"))
@@ -106,8 +108,8 @@ class RoomManagement:
         self.add_button = ctk.CTkButton(form_frame, text="Add Room", command=self.add_room)
         self.add_button.grid(row=5, column=0, columnspan=2, pady=10)
 
-        self.update_button = ctk.CTkButton(form_frame, text="Update Room", command=self.update_room)
-        self.delete_button = ctk.CTkButton(form_frame, text="Delete Room", command=self.delete_room)
+        self.update_button = ctk.CTkButton(form_frame, text="Update Room", command=self.update_room, fg_color=UPDATE_COLOR)
+        self.delete_button = ctk.CTkButton(form_frame, text="Delete Room", command=self.delete_room, fg_color=DELETE_COLOR)
 
         # Load rooms
         self.load_rooms()
