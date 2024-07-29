@@ -150,23 +150,6 @@ class RoomManagement:
             self.update_button.grid_forget()
             self.delete_button.grid_forget()
 
-
-    # def add_room(self):
-    #     try:
-    #         room_type = next((rt for rt in RoomType.get_all() if rt.name == self.room_type_var.get()), None)
-    #         if room_type:
-    #             Room.create(
-    #                 room_type_id=room_type.room_types_id,
-    #                 room_number=f"R{len(Room.get_all()) + 1:03d}",  # Generate a room number
-    #                 status=self.status_var.get(),
-    #                 location=self.location_var.get()
-    #             )
-    #             self.refresh()
-    #             tkinter.messagebox.showinfo("Success", "Room added successfully")
-    #         else:
-    #             tkinter.messagebox.showerror("Error", "Invalid room type selected")
-    #     except ValueError as e:
-    #         tkinter.messagebox.showerror("Error", str(e))
     def add_room(self):
         try:
             room_type = next((rt for rt in RoomType.get_all() if rt.name == self.room_type_var.get()), None)
