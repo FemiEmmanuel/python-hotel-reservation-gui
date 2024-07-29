@@ -151,13 +151,37 @@ class RoomManagement:
             self.delete_button.grid_forget()
 
 
+    # def add_room(self):
+    #     try:
+    #         room_type = next((rt for rt in RoomType.get_all() if rt.name == self.room_type_var.get()), None)
+    #         if room_type:
+    #             Room.create(
+    #                 room_type_id=room_type.room_types_id,
+    #                 room_number=f"R{len(Room.get_all()) + 1:03d}",  # Generate a room number
+    #                 status=self.status_var.get(),
+    #                 location=self.location_var.get()
+    #             )
+    #             self.refresh()
+    #             tkinter.messagebox.showinfo("Success", "Room added successfully")
+    #         else:
+    #             tkinter.messagebox.showerror("Error", "Invalid room type selected")
+    #     except ValueError as e:
+    #         tkinter.messagebox.showerror("Error", str(e))
     def add_room(self):
         try:
             room_type = next((rt for rt in RoomType.get_all() if rt.name == self.room_type_var.get()), None)
             if room_type:
+                # Get the highest room number currently in use
+                existing_rooms = Room.get_all()
+                highest_room_number = max([int(room.room_number[1:]) for room in existing_rooms], default=0)
+
+                # Generate the next room number
+                next_room_number = highest_room_number + 1
+                new_room_number = f"R{next_room_number:03d}"
+
                 Room.create(
                     room_type_id=room_type.room_types_id,
-                    room_number=f"R{len(Room.get_all()) + 1:03d}",  # Generate a room number
+                    room_number=new_room_number,
                     status=self.status_var.get(),
                     location=self.location_var.get()
                 )
@@ -167,6 +191,7 @@ class RoomManagement:
                 tkinter.messagebox.showerror("Error", "Invalid room type selected")
         except ValueError as e:
             tkinter.messagebox.showerror("Error", str(e))
+
 
     def update_room(self):
         selection = self.room_list.curselection()

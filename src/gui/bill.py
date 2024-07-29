@@ -169,9 +169,14 @@ class BillManagement:
         bills = Bill.get_all_bill_details()
         self.bill_list.delete(0, "end")
         self.bill_id_map.clear()
+
         for index, bill in enumerate(bills):
-            self.bill_list.insert("end", f"Bill {bill['bill_id']}: Reservation {bill['reservation_id']} - ${bill['amount']}")
+            # Format the bill description
+            bill_description = f"💲 Bill #{bill['bill_id']}: Reservation #{bill['reservation_id']} - ${bill['amount']:.2f} (Customer: {bill['customer_name']})"
+            
+            self.bill_list.insert("end", bill_description)
             self.bill_id_map[index] = bill['bill_id']
+
 
 
     def on_select(self, event):
