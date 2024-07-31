@@ -121,11 +121,11 @@ class RoomManagement(BaseManagement):
                     location=self.location_var.get()
                 )
                 self.refresh()
-                self.show_info("Success", "Room added successfully")
+                self.handle_success("added")
             else:
-                self.show_error("Error", "Invalid room type selected")
+                self.handle_error("invalid room type selected", e)
         except ValueError as e:
-            self.show_error("Error", str(e))
+            self.handle_error("adding room", e)
 
     def update_item(self):
         selection = self.item_list.curselection()
@@ -139,11 +139,11 @@ class RoomManagement(BaseManagement):
                         status=self.status_var.get(),
                     )
                     self.refresh()
-                    self.show_info("Success", "Room updated successfully")
+                    self.handle_success("updated")
                 except ValueError as e:
-                    self.show_error("Error", str(e))
+                    self.handle_error("updating room", e)
         else:
-            self.show_warning("Warning", "Please select a room to update")
+            self.handle_not_selected_error()
 
     def delete_item(self):
         selection = self.item_list.curselection()
@@ -154,9 +154,9 @@ class RoomManagement(BaseManagement):
                 if self.confirm("Confirm", "Are you sure you want to delete this room?"):
                     Room.delete(room_id)
                     self.refresh()
-                    self.show_info("Success", "Room deleted successfully")
+                    self.handle_success("deleted")
         else:
-            self.show_warning("Warning", "Please select a room to delete")
+            self.handle_not_selected_error()
 
     def search_items(self):
         criteria = self.search_var.get()

@@ -75,15 +75,15 @@ class CustomerManagement(BaseManagement):
         email = self.email_var.get()
 
         if not all([name, contact, email]):
-            self.show_error("Error", "Name, contact, and email are required fields.")
+            self.handle_validation_error("Name, contact, and email are required fields.")
             return
 
         try:
             Customer.create(name, contact, address, email)
             self.refresh()
-            self.show_info("Success", "Customer added successfully")
+            self.handle_success("added")
         except ValueError as e:
-            self.show_error("Error", str(e))
+            self.handle_error("adding customer", e)
 
     def update_item(self):
         selection = self.item_list.curselection()
@@ -97,17 +97,17 @@ class CustomerManagement(BaseManagement):
                 email = self.email_var.get()
 
                 if not all([name, contact, email]):
-                    self.show_error("Error", "Name, contact, and email are required fields.")
+                    self.handle_validation_error("Name, contact, and email are required fields.")
                     return
 
                 try:
                     Customer.update(customer_id, name, contact, address, email)
                     self.refresh()
-                    self.show_info("Success", "Customer updated successfully")
+                    self.handle_success("updated")
                 except ValueError as e:
-                    self.show_error("Error", str(e))
+                    self.handle_error("updating customer", e)
         else:
-            self.show_warning("Warning", "Please select a customer to update")
+            self.handle_not_selected_error()
 
     def delete_item(self):
         selection = self.item_list.curselection()
@@ -119,11 +119,11 @@ class CustomerManagement(BaseManagement):
                     try:
                         Customer.delete(customer_id)
                         self.refresh()
-                        self.show_info("Success", "Customer deleted successfully")
+                        self.handle_success("deleted")
                     except ValueError as e:
-                        self.show_error("Error", str(e))
+                        self.handle_error("deleting customer", e)
         else:
-            self.show_warning("Warning", "Please select a customer to delete")
+            self.handle_not_selected_error()
 
     def search_items(self):
         criteria = self.search_var.get()

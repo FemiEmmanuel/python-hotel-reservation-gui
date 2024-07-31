@@ -94,14 +94,35 @@ class BaseManagement:
         self.clear_fields()
         self.list_title.configure(text=f"All {self.title}")
 
+    def show_message(self, message_type, title, message):
+        if message_type == "info":
+            tkinter.messagebox.showinfo(title, message)
+        elif message_type == "error":
+            tkinter.messagebox.showerror(title, message)
+        elif message_type == "warning":
+            tkinter.messagebox.showwarning(title, message)
+
     def show_info(self, title, message):
-        tkinter.messagebox.showinfo(title, message)
+        self.show_message("info", title, message)
 
     def show_error(self, title, message):
-        tkinter.messagebox.showerror(title, message)
+        self.show_message("error", title, message)
 
     def show_warning(self, title, message):
-        tkinter.messagebox.showwarning(title, message)
+        self.show_message("warning", title, message)
 
     def confirm(self, title, message):
         return tkinter.messagebox.askyesno(title, message)
+
+    def handle_error(self, operation, error):
+        error_message = f"An error occurred during {operation}: {str(error)}"
+        self.show_error("Error", error_message)
+
+    def handle_success(self, operation):
+        self.show_info("Success", f"{self.title} {operation} successfully")
+
+    def handle_validation_error(self, message):
+        self.show_warning("Validation Error", message)
+
+    def handle_not_selected_error(self):
+        self.show_warning("Warning", f"Please select a {self.title.lower()} to perform this action")

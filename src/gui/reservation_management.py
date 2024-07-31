@@ -208,9 +208,9 @@ class ReservationManagement(BaseManagement):
                 float(self.total_cost_var.get().replace('$', ''))
             )
             self.refresh()
-            self.show_info("Success", "Reservation added successfully")
+            self.handle_success("added")
         except ValueError as e:
-            self.show_error("Error", str(e))
+            self.handle_error("adding reservation", e)
 
     def update_item(self):
         selection = self.item_list.curselection()
@@ -228,11 +228,11 @@ class ReservationManagement(BaseManagement):
                         float(self.total_cost_var.get().replace('$', ''))
                     )
                     self.refresh()
-                    self.show_info("Success", "Reservation updated successfully")
+                    self.handle_success("updated")
                 except ValueError as e:
-                    self.show_error("Error", str(e))
+                    self.handle_error("updating reservation", e)
         else:
-            self.show_warning("Warning", "Please select a reservation to update")
+            self.handle_not_selected_error()
 
     def delete_item(self):
         selection = self.item_list.curselection()
@@ -243,9 +243,9 @@ class ReservationManagement(BaseManagement):
                 if self.confirm("Confirm", "Are you sure you want to delete this reservation?"):
                     Reservation.delete(reservation_id)
                     self.refresh()
-                    self.show_info("Success", "Reservation deleted successfully")
+                    self.handle_success("deleted")
         else:
-            self.show_warning("Warning", "Please select a reservation to delete")
+            self.handle_not_selected_error()
 
     def search_items(self):
         criteria = self.search_var.get()

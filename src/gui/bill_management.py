@@ -155,18 +155,26 @@ class BillManagement(BaseManagement):
             self.clear_fields()
 
     def add_item(self):
+        reservation_id = self.reservation_id_var.get()
+        amount = self.amount_var.get()
+        date = self.date_var.get()
+
+        if not all([reservation_id, amount, date]):
+            self.handle_validation_error("Reservation field required.")
+            return
+        
         try:
             selected_services = [service_id for service_id, var in self.services_vars if var.get()]
             Bill.create(
-                int(self.reservation_id_var.get()),
-                float(self.amount_var.get().replace('$', '')),
-                self.date_var.get(),
+                int(reservation_id),
+                float(amount.replace('$', '')),
+                date,
                 selected_services
             )
             self.refresh()
-            self.show_info("Success", "Bill added successfully")
+            self.handle_success("added")
         except ValueError as e:
-            self.show_error("Error", str(e))
+            self.handle_error("adding bill", e)
 
     def update_item(self):
         selection = self.item_list.curselection()
@@ -174,21 +182,29 @@ class BillManagement(BaseManagement):
             index = selection
             bill_id = self.id_map.get(index)
             if bill_id:
+                reservation_id = self.reservation_id_var.get()
+                amount = self.amount_var.get()
+                date = self.date_var.get()
+
+                if not all([reservation_id, amount, date]):
+                    self.handle_validation_error("Reservation field required.")
+                    return
+                
                 try:
                     selected_services = [service_id for service_id, var in self.services_vars if var.get()]
                     Bill.update(
                         bill_id,
-                        int(self.reservation_id_var.get()),
-                        float(self.amount_var.get().replace('$', '')),
-                        self.date_var.get(),
+                        int(reservation_id),
+                        float(amount.replace('$', '')),
+                        date,
                         selected_services
                     )
                     self.refresh()
-                    self.show_info("Success", "Bill updated successfully")
+                    self.handle_success("updated")
                 except ValueError as e:
-                    self.show_error("Error", str(e))
+                    self.handle_error("updating bill", e)
         else:
-            self.show_warning("Warning", "Please select a bill to update")
+           self.handle_not_selected_error()
 
     def delete_item(self):
         selection = self.item_list.curselection()
@@ -197,11 +213,14 @@ class BillManagement(BaseManagement):
             bill_id = self.id_map.get(index)
             if bill_id:
                 if self.confirm("Confirm", "Are you sure you want to delete this bill?"):
-                    Bill.delete(bill_id)
-                    self.refresh()
-                    self.show_info("Success", "Bill deleted successfully")
+                    try:
+                        Bill.delete(bill_id)
+                        self.refresh()
+                        self.handle_success("deleted")
+                    except ValueError as e:
+                        self.handle_error("deleting bill", e)
         else:
-            self.show_warning("Warning", "Please select a bill to delete")
+            self.handle_not_selected_error()
 
     def search_items(self):
         criteria = self.search_var.get()
