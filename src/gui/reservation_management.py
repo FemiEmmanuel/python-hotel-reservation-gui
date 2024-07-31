@@ -1,66 +1,23 @@
 import customtkinter as ctk
 from CTkListbox import *
-import tkinter.messagebox
+from tkcalendar import DateEntry
+from datetime import datetime
+
+from gui.base_management import BaseManagement
 from model.reservation import Reservation
 from model.customer import Customer
 from model.room import Room
 from utils.colors import *
-from tkcalendar import DateEntry
-from datetime import datetime
 
-class ReservationManagement:
+
+class ReservationManagement(BaseManagement):
     def __init__(self, master):
-        self.master = master
-        self.reservation_id_map = {}
+        super().__init__(master, "Reservations")
         self.customer_id_map = {}
         self.room_id_map = {}
-        self.create_widgets()
+        self.create_reservation_specific_widgets()
 
-    def create_widgets(self):
-        self.master.grid_columnconfigure(0, weight=7)
-        self.master.grid_columnconfigure(1, weight=3)
-        self.master.grid_rowconfigure(0, weight=1)
-
-        left_frame = ctk.CTkFrame(self.master)
-        left_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
-        left_frame.grid_rowconfigure(0, weight=0) 
-        left_frame.grid_rowconfigure(1, weight=0) 
-        left_frame.grid_rowconfigure(2, weight=1) 
-        left_frame.grid_columnconfigure(0, weight=1)
-
-        # Search bar frame
-        search_frame = ctk.CTkFrame(left_frame)
-        search_frame.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
-        search_frame.grid_columnconfigure(0, weight=1)
-
-        self.search_var = ctk.StringVar()
-        self.search_entry = ctk.CTkEntry(search_frame, textvariable=self.search_var, placeholder_text="Search reservations...", width=200)
-        self.search_entry.grid(row=0, column=0, sticky="ew", padx=(0, 5))
-        self.search_entry.bind("<Return>", lambda event: self.search_reservations())
-
-        self.search_button = ctk.CTkButton(search_frame, text="Search", command=self.search_reservations, width=100, fg_color=SEARCH_COLOR)
-        self.search_button.grid(row=0, column=1)
-
-        # Refresh button
-        self.refresh_button = ctk.CTkButton(search_frame, text="Refresh", command=self.refresh, width=100, fg_color=REFRESH_COLOR)
-        self.refresh_button.grid(row=0, column=2)
-
-        self.list_title = ctk.CTkLabel(left_frame, text="All Reservations", font=("Arial", 16, "bold"))
-        self.list_title.grid(row=1, column=0, sticky="w", padx=5, pady=(5, 0))
-
-        # Reservation list
-        self.reservation_list = CTkListbox(left_frame, command=self.on_select)
-        self.reservation_list.grid(row=2, column=0, sticky="nsew", padx=5, pady=5)
-
-        # Right frame
-        self.right_frame = ctk.CTkFrame(self.master)
-        self.right_frame.grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
-        self.right_frame.grid_columnconfigure(0, weight=1)
-
-        self.right_frame.grid_rowconfigure(0, weight=1)  
-        self.right_frame.grid_rowconfigure(1, weight=0) 
-        self.right_frame.grid_rowconfigure(2, weight=1)
-
+    def create_reservation_specific_widgets(self):
         # Variables
         self.customer_search_var = ctk.StringVar()
         self.customer_id_var = ctk.StringVar()
@@ -70,76 +27,75 @@ class ReservationManagement:
         self.check_out_var = ctk.StringVar()
         self.total_cost_var = ctk.StringVar()
 
-        form_frame = ctk.CTkFrame(self.right_frame)
-        form_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
-
-        # Entry fields
-        ctk.CTkLabel(form_frame, text="Customer:").grid(row=0, column=0, sticky="w", padx=10, pady=5)
-        self.customer_search_frame = ctk.CTkFrame(form_frame)
+        # Customer fields
+        ctk.CTkLabel(self.form_frame, text="Customer:").grid(row=0, column=0, sticky="w", padx=10, pady=5)
+        self.customer_search_frame = ctk.CTkFrame(self.form_frame)
         self.customer_search_frame.grid(row=0, column=1, sticky="w", padx=10, pady=5)
         self.customer_entry = ctk.CTkEntry(self.customer_search_frame, textvariable=self.customer_search_var)
         self.customer_entry.pack(side="left")
         self.customer_search_button = ctk.CTkButton(self.customer_search_frame, text="Search", command=self.search_customer, fg_color=SEARCH_COLOR)
         self.customer_search_button.pack(side="left")
         
-        self.customer_listbox = CTkListbox(form_frame, command=self.on_customer_select)
+        self.customer_listbox = CTkListbox(self.form_frame, command=self.on_customer_select)
         self.customer_listbox.grid(row=1, column=0, columnspan=2, sticky="ew", padx=10, pady=5)
         self.customer_listbox.grid_remove()
 
-        ctk.CTkLabel(form_frame, text="Room:").grid(row=2, column=0, sticky="w", padx=10, pady=5)
-        self.room_search_frame = ctk.CTkFrame(form_frame)
+        # Room fields
+        ctk.CTkLabel(self.form_frame, text="Room:").grid(row=2, column=0, sticky="w", padx=10, pady=5)
+        self.room_search_frame = ctk.CTkFrame(self.form_frame)
         self.room_search_frame.grid(row=2, column=1, sticky="w", padx=10, pady=5)
         self.room_entry = ctk.CTkEntry(self.room_search_frame, textvariable=self.room_search_var)
         self.room_entry.pack(side="left")
         self.room_search_button = ctk.CTkButton(self.room_search_frame, text="Search", command=self.search_room, fg_color=SEARCH_COLOR)
         self.room_search_button.pack(side="left")
         
-        self.room_listbox = CTkListbox(form_frame, command=self.on_room_select)
+        self.room_listbox = CTkListbox(self.form_frame, command=self.on_room_select)
         self.room_listbox.grid(row=3, column=0, columnspan=2, sticky="ew", padx=10, pady=5)
         self.room_listbox.grid_remove()
 
-        ctk.CTkLabel(form_frame, text="Check-in Date:").grid(row=4, column=0, sticky="w", padx=10, pady=5)
-        self.check_in_entry = DateEntry(form_frame, textvariable=self.check_in_var, date_pattern='yyyy-mm-dd')
+        # Date fields
+        ctk.CTkLabel(self.form_frame, text="Check-in Date:").grid(row=4, column=0, sticky="w", padx=10, pady=5)
+        self.check_in_entry = DateEntry(self.form_frame, textvariable=self.check_in_var, date_pattern='yyyy-mm-dd')
         self.check_in_entry.grid(row=4, column=1, sticky="w", padx=10, pady=5)
         self.check_in_entry.bind("<<DateEntrySelected>>", self.calculate_total_cost)
 
-        ctk.CTkLabel(form_frame, text="Check-out Date:").grid(row=5, column=0, sticky="w", padx=10, pady=5)
-        self.check_out_entry = DateEntry(form_frame, textvariable=self.check_out_var, date_pattern='yyyy-mm-dd')
+        ctk.CTkLabel(self.form_frame, text="Check-out Date:").grid(row=5, column=0, sticky="w", padx=10, pady=5)
+        self.check_out_entry = DateEntry(self.form_frame, textvariable=self.check_out_var, date_pattern='yyyy-mm-dd')
         self.check_out_entry.grid(row=5, column=1, sticky="w", padx=10, pady=5)
         self.check_out_entry.bind("<<DateEntrySelected>>", self.calculate_total_cost)
 
-        ctk.CTkLabel(form_frame, text="Total Cost:").grid(row=6, column=0, sticky="w", padx=10, pady=5)
-        ctk.CTkEntry(form_frame, textvariable=self.total_cost_var, state="readonly").grid(row=6, column=1, sticky="w", padx=10, pady=5)
+        ctk.CTkLabel(self.form_frame, text="Total Cost:").grid(row=6, column=0, sticky="w", padx=10, pady=5)
+        ctk.CTkEntry(self.form_frame, textvariable=self.total_cost_var, state="readonly").grid(row=6, column=1, sticky="w", padx=10, pady=5)
 
         # Buttons
-        self.button_frame = ctk.CTkFrame(form_frame)
+        self.button_frame = ctk.CTkFrame(self.form_frame)
         self.button_frame.grid(row=7, column=0, columnspan=2, pady=10)
 
         self.check_availability_button = ctk.CTkButton(self.button_frame, text="Check Availability", command=self.check_availability, fg_color=INVOICE_COLOR)
         self.check_availability_button.pack(side="left", padx=10)
 
-        self.add_button = ctk.CTkButton(self.button_frame, text="Add Reservation", command=self.add_reservation, state="disabled")
+        self.add_button = ctk.CTkButton(self.button_frame, text="Add Reservation", command=self.add_item, state="disabled")
         self.add_button.pack(side="left", padx=10)
 
-        self.update_button = ctk.CTkButton(form_frame, text="Update Reservation", command=self.update_reservation, fg_color=UPDATE_COLOR)
-        self.delete_button = ctk.CTkButton(form_frame, text="Delete Reservation", command=self.delete_reservation, fg_color=DELETE_COLOR)
+        self.update_button = ctk.CTkButton(self.form_frame, text="Update Reservation", command=self.update_item, fg_color=UPDATE_COLOR)
+        self.delete_button = ctk.CTkButton(self.form_frame, text="Delete Reservation", command=self.delete_item, fg_color=DELETE_COLOR)
 
-        self.load_reservations()
+        self.load_items()
 
-    def load_reservations(self):
+    def load_items(self):
         reservations = Reservation.get_all_reservation_details()
-        self.reservation_list.delete(0, "end")
-        self.reservation_id_map.clear()
+        self.item_list.delete(0, "end")
+        self.id_map.clear()
         for index, reservation in enumerate(reservations):
             display_text = f"{reservation['customer_name']} - Room {reservation['room_number']} ({reservation['room_type']})"
-            self.reservation_list.insert("end", display_text)
-            self.reservation_id_map[index] = reservation['reservation_id']
+            self.item_list.insert("end", display_text)
+            self.id_map[index] = reservation['reservation_id']
 
     def on_select(self, event):
-        selection = self.reservation_list.curselection()
+        selection = self.item_list.curselection()
         if selection is not None:
             index = selection
-            reservation_id = self.reservation_id_map.get(index)
+            reservation_id = self.id_map.get(index)
             if reservation_id:
                 reservation = Reservation.get_reservation_details(reservation_id)
                 self.customer_search_var.set(reservation['customer_name'])
@@ -198,7 +154,7 @@ class ReservationManagement:
         for index, room in enumerate(rooms):
             self.room_listbox.insert("end", f"{room.room_number} - {room.room_type.name}")
             self.room_id_map[index] = room.room_id
-        self.room_listbox.grid() 
+        self.room_listbox.grid()
 
     def on_room_select(self, event):
         selection = self.room_listbox.curselection()
@@ -213,7 +169,6 @@ class ReservationManagement:
                 self.room_search_button.pack_forget()
                 self.room_listbox.grid_remove()
                 self.calculate_total_cost()
-
 
     def calculate_total_cost(self, event=None):
         if self.room_id_var.get() and self.check_in_var.get() and self.check_out_var.get():
@@ -235,15 +190,15 @@ class ReservationManagement:
             overlapping_reservations = Reservation.check_overlapping_reservations(room_id, check_in, check_out)
             
             if not overlapping_reservations:
-                tkinter.messagebox.showinfo("Availability", "The room is available for the selected dates.")
+                self.show_info("Availability", "The room is available for the selected dates.")
                 self.add_button.configure(state="normal")
             else:
-                tkinter.messagebox.showwarning("Availability", "The room is not available for the selected dates.")
+                self.show_warning("Availability", "The room is not available for the selected dates.")
                 self.add_button.configure(state="disabled")
         except ValueError as e:
-            tkinter.messagebox.showerror("Error", str(e))
+            self.show_error("Error", str(e))
 
-    def add_reservation(self):
+    def add_item(self):
         try:
             Reservation.create(
                 int(self.customer_id_var.get()),
@@ -253,15 +208,15 @@ class ReservationManagement:
                 float(self.total_cost_var.get().replace('$', ''))
             )
             self.refresh()
-            tkinter.messagebox.showinfo("Success", "Reservation added successfully")
+            self.show_info("Success", "Reservation added successfully")
         except ValueError as e:
-            tkinter.messagebox.showerror("Error", str(e))
+            self.show_error("Error", str(e))
 
-    def update_reservation(self):
-        selection = self.reservation_list.curselection()
+    def update_item(self):
+        selection = self.item_list.curselection()
         if selection is not None:
             index = selection
-            reservation_id = self.reservation_id_map.get(index)
+            reservation_id = self.id_map.get(index)
             if reservation_id:
                 try:
                     Reservation.update(
@@ -273,34 +228,34 @@ class ReservationManagement:
                         float(self.total_cost_var.get().replace('$', ''))
                     )
                     self.refresh()
-                    tkinter.messagebox.showinfo("Success", "Reservation updated successfully")
+                    self.show_info("Success", "Reservation updated successfully")
                 except ValueError as e:
-                    tkinter.messagebox.showerror("Error", str(e))
+                    self.show_error("Error", str(e))
         else:
-            tkinter.messagebox.showwarning("Warning", "Please select a reservation to update")
+            self.show_warning("Warning", "Please select a reservation to update")
 
-    def delete_reservation(self):
-        selection = self.reservation_list.curselection()
+    def delete_item(self):
+        selection = self.item_list.curselection()
         if selection is not None:
             index = selection
-            reservation_id = self.reservation_id_map.get(index)
+            reservation_id = self.id_map.get(index)
             if reservation_id:
-                if tkinter.messagebox.askyesno("Confirm", "Are you sure you want to delete this reservation?"):
+                if self.confirm("Confirm", "Are you sure you want to delete this reservation?"):
                     Reservation.delete(reservation_id)
                     self.refresh()
-                    tkinter.messagebox.showinfo("Success", "Reservation deleted successfully")
+                    self.show_info("Success", "Reservation deleted successfully")
         else:
-            tkinter.messagebox.showwarning("Warning", "Please select a reservation to delete")
+            self.show_warning("Warning", "Please select a reservation to delete")
 
-    def search_reservations(self):
+    def search_items(self):
         criteria = self.search_var.get()
         reservations = Reservation.search(criteria)
-        self.reservation_list.delete(0, "end")
-        self.reservation_id_map.clear()
+        self.item_list.delete(0, "end")
+        self.id_map.clear()
         for index, reservation in enumerate(reservations):
             display_text = f"{reservation['customer_name']} - Room {reservation['room_number']} ({reservation['room_type']})"
-            self.reservation_list.insert("end", display_text)
-            self.reservation_id_map[index] = reservation['reservation_id']
+            self.item_list.insert("end", display_text)
+            self.id_map[index] = reservation['reservation_id']
         
         if criteria:
             self.list_title.configure(text=f"Search Results for '{criteria}'")
@@ -332,9 +287,16 @@ class ReservationManagement:
         self.customer_id_map.clear()
         self.room_id_map.clear()
 
+        self.button_frame.grid(row=7, column=0, columnspan=2, pady=10)
+        self.add_button.configure(state="disabled")
 
     def refresh(self):
-        self.load_reservations()
-        self.clear_fields()
-        self.list_title.configure(text="All Reservations")
+        super().refresh()
+        self.button_frame.grid(row=7, column=0, columnspan=2, pady=10)
+        self.add_button.configure(state="disabled")
 
+    def update_list_title(self, criteria=""):
+        if criteria:
+            self.list_title.configure(text=f"Search Results for '{criteria}'")
+        else:
+            self.list_title.configure(text="All Reservations")
